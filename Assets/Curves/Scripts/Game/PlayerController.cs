@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
 {
     static readonly int Speed = Animator.StringToHash("Speed");
     static readonly int ThrowHash = Animator.StringToHash("Throw");
+    static readonly int CatchHash = Animator.StringToHash("Catch");
 
     [Header("References")]
     public CharacterController characterController;
@@ -77,7 +78,11 @@ public class PlayerController : MonoBehaviour
         }
 
         if (_axeState == AxeState.Away && Mouse.current.rightButton.wasPressedThisFrame)
+        {
             StartCoroutine(ReturnAxe());
+            animator.SetTrigger(CatchHash);
+        }
+            
     }
 
     public void LaunchAxe()
@@ -109,6 +114,7 @@ public class PlayerController : MonoBehaviour
         float elapsedTime = 0f;
         while(elapsedTime < returnDuration)
         {
+            
             float t = elapsedTime / returnDuration;
             
             Vector3 p0 = start;
@@ -134,6 +140,7 @@ public class PlayerController : MonoBehaviour
         // TODO Slice 5.5 (optional): keep the start fixed; let the handle and end
         // follow the moving hand.
         // Check: turn during recall. The axe still lands in the animated grip.
+        animator.speed = 1;
         axe.AttachToHand();
         _axeState = AxeState.Held;
         // Next: open Demo, Slice 6.1 in Bezier/QuadraticBezierMath.cs.
@@ -189,5 +196,21 @@ public class PlayerController : MonoBehaviour
         // Changing bowAmount changes the bow.
         // Next: Slice 5.3 in ReturnAxe.
         _lineRenderer.positionCount = 0;
+    }
+
+    public void PauseAnimation()
+    {
+        animator.speed = 0;
+    }
+
+
+    public void ReturnAxeNow()
+    {
+        if (_axeState == AxeState.Away)
+        {
+            StartCoroutine(ReturnAxe());
+            animator.SetTrigger(CatchHash); 
+        }
+        
     }
 }
