@@ -28,4 +28,9 @@ public class AnimationEvents : MonoBehaviour
     {
         OnStep?.Invoke();
     }
+
+    public void CatchPause()
+    {
+        playerController.PauseAnimation();
+    }
 }

@@ -12,6 +12,10 @@ public class ThrownAxe : MonoBehaviour
     public Collider axeCollider;
     public float spinSpeed = 1000f;
 
+    [SerializeField] ParticleSystem particleSystem;
+    [SerializeField] TrailRenderer trailRenderer;
+    [SerializeField] AudioClip audioClip;
+
     Transform _hand;
     Vector3 _heldLocalPosition;
     Quaternion _heldLocalRotation;
@@ -27,6 +31,11 @@ public class ThrownAxe : MonoBehaviour
 
     public Vector3 CatchPosition => _hand.TransformPoint(_heldLocalPosition);
 
+    public void Awake()
+    {
+        trailRenderer.emitting = false;
+    }
+    
     public void Launch(Vector3 direction, float impulse, CharacterController thrower)
     {
         _hand = transform.parent;
@@ -46,6 +55,9 @@ public class ThrownAxe : MonoBehaviour
         rigidbody.isKinematic = false;
         axeCollider.enabled = true;
 
+        trailRenderer.emitting = true;
+        AudioSource.PlayClipAtPoint(audioClip, Vector3.zero);
+
         rigidbody.AddForce(direction * impulse, ForceMode.VelocityChange);
         rigidbody.AddTorque(transform.forward * (-spinSpeed * Mathf.Deg2Rad), ForceMode.VelocityChange);
         // Next: Slice 4.2 in OnCollisionEnter.
@@ -61,6 +73,9 @@ public class ThrownAxe : MonoBehaviour
         transform.SetLocalPositionAndRotation(_heldLocalPosition, _heldLocalRotation);
         rigidbody.isKinematic = true;
         axeCollider.enabled = false;
+
+        particleSystem.Play();
+        trailRenderer.emitting = false;
         // TODO Slice 8.3 (catch hook): stop the spin and restore the held look.
         // Check: throw and recall both spin. Two full cycles end with the original held look.
         // Next: polish, networking, and your showcase video. </> end of Slice 8
@@ -77,6 +92,8 @@ public class ThrownAxe : MonoBehaviour
         // The Launch test and the four starting-green tests still pass.
         // Next: Slice 5.1 in PlayerController.GetReturnControlPoints. </> end of Slice 4
         rigidbody.isKinematic = true;
+        trailRenderer.emitting = false;
+        particleSystem.Play();
         // TODO Slice 8.3 (contact hook): stop visual spin while stuck.
     }
 }
